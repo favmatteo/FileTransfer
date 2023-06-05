@@ -1,0 +1,198 @@
+<?php
+session_start();
+if(!isset($_SESSION['user'])) {
+    header('Location: signin.html');
+    exit();
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Transfer</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link type="text/css" rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+
+    <link rel="icon" type="image/x-icon" href="../images/favicon.png">
+</head>
+<body>
+  <div class="content">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <a class="navbar-brand" href="#">
+        <img src="../images/logo.png" width="30" height="30" class="d-inline-block align-top" alt="Logo">
+        File Transfer
+      </a>
+      <div class="navbar-collapse justify-content-end">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" id="logout" href="#">
+              <button class="btn btn-primary"><i class="bi bi-box-arrow-right"></i></button>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="container mt-3">
+          <div class="btn-group">
+            <input type="file" id="fileInput" name="file" class="file-input" style="display: none;">
+            <label for="fileInput" class="btn btn-light custom-btn upload-btn">Upload</label>
+  
+            <button class="btn btn-light custom-btn new-folder-btn">New Folder</button>
+
+            <div class="loader"></div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table mt-2">
+              <thead>
+                <tr>
+                  <th scope="col" class="width-80">File name</th>
+                  <th scope="col" class="width-5" >Space</th>
+                  <th scope="col" class="width-5">Download</th>
+                  <th scope="col" class="width-5">Share</th>
+                  <th scope="col" class="width-5">Delete</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    © Matteo Favaro. All rights reserved.
+  </div>
+      
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+      $(document).ready(() => {
+          $("#logout").click((e) => {
+              $.ajax({
+                  url: "../php/logout.php",
+                  type: "POST",
+                  success: function (res) {
+                    window.location.href = "signin.html";
+                  }
+              });
+          });
+      });
+  </script>
+  <!-- script that call a php file and fill the table -->
+  <script>
+    $(document).ready(() => {
+      $.ajax({
+        url: "../php/get-files.php",
+        type: "POST",
+        dataType: "json",
+        success: function (res) {
+          if (res.status === "success") {
+            res.files.forEach(function (file) {
+              const space = (file.size / 1000000).toFixed(2);
+
+              const row = $("<tr></tr>");
+              const name = $("<td></td>").text(file.title);
+              const size = $("<td></td>").text(space + 'MB');
+              const download = $(`<td><button class="btn btn-light" onclick="download('${file.id_file}')"><i class="bi bi-download"></i></td></button>`);
+              const share = $(`<td><button class="btn btn-success" onclick="share('${file.id_file}')"><i class="bi bi-share"></i></td></button>`);
+              const del = $(`<td><button class="btn btn-danger" onclick="delete('${file.id_file}')"><i class="bi bi-trash"></i></td></button>`);
+
+              row.append(name);
+              row.append(size);
+              row.append(download);
+              row.append(share);
+              row.append(del);
+              $("tbody").append(row);
+            });
+          } else {
+            console.log(res.message);
+          }
+        },
+        error: function (err) {
+          console.log("error");
+          console.log(err);
+        }
+      });
+    });
+  </script>
+
+  <script>
+    document.getElementById('fileInput').onclick = function () {
+      this.value = null; 
+    };
+
+    document.querySelector('.upload-btn').onclick = function () {
+      document.getElementById('fileInput').click();
+    };
+  </script>
+  
+  <script>
+    function download(id_file) {
+      $.ajax({
+        url: "../php/download.php",
+        type: "POST",
+        data: {
+          id_file: id_file
+        },
+        success: function (res) {
+          console.log("download", id_file);
+          file = res.file;
+          const link = document.createElement("a");
+          link.href = "data:application/octet-stream;base64," + String.raw`${file.file}`;
+          link.download = file.title;
+          link.click();
+        },
+        error: function (err) {
+          console.log("error");
+          console.log(err);
+        }
+      });
+    }
+  </script>
+
+  <script>
+    $(document).ready(function() {
+      $('#fileInput').change(function(e) {
+        var file = e.target.files[0];
+        uploadFile(file);
+      });
+
+      $('#uploadButton').click(function() {
+        $('#fileInput').click();
+      });
+    });
+
+    function uploadFile(file) {
+      var formData = new FormData();
+      formData.append('file', file);
+
+      document.getElementsByClassName('loader')[0].style.display = 'block';
+      
+      $.ajax({
+        url: '../php/upload.php',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+          alert(response.message);
+          window.location.reload();
+        },
+        error: function(xhr, status, error) {
+          console.error('Error uploading file');
+          console.log(xhr.responseText);
+        }
+      });
+   }
+  </script>
+
+</body>
+</html>
