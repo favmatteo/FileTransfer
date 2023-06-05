@@ -49,6 +49,7 @@ if(!isset($_SESSION['user'])) {
             <div class="loader"></div>
           </div>
 
+          <h2>Your file</h2>
           <div class="table-responsive">
             <table class="table mt-2">
               <thead>
@@ -60,16 +61,51 @@ if(!isset($_SESSION['user'])) {
                   <th scope="col" class="width-5">Delete</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="files">
+              </tbody>
+          </table>
+
+          <h2>Shared with you</h2>
+          <div class="table-responsive">
+            <table class="table mt-2">
+              <thead>
+                <tr>
+                  <th scope="col" class="width-80">File name</th>
+                  <th scope="col" class="width-5">Download</th>
+                  <th scope="col" class="width-5" >Space</th>
+                  <th scope="col" class="width-10">Creator</th>
+                </tr>
+              </thead>
+              <tbody id="files-shared">
               </tbody>
           </table>
         </div>
       </div>
     </div>
   </div>
-  <div class="footer">
-    © Matteo Favaro. All rights reserved.
-  </div>
+
+  <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+          <!-- table with username and a cehckbox-->
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Username</th>
+                <th scope="col">Share</th>
+              </tr>
+            </thead>
+            <tbody id="users">
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="shareButton" onclick="share()">Share</button>
+        </div>
+      </div>
+    </div>
       
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -86,7 +122,8 @@ if(!isset($_SESSION['user'])) {
           });
       });
   </script>
-  <!-- script that call a php file and fill the table -->
+
+
   <script>
     $(document).ready(() => {
       $.ajax({
@@ -102,15 +139,15 @@ if(!isset($_SESSION['user'])) {
               const name = $("<td></td>").text(file.title);
               const size = $("<td></td>").text(space + 'MB');
               const download = $(`<td><button class="btn btn-light" onclick="download('${file.id_file}')"><i class="bi bi-download"></i></td></button>`);
-              const share = $(`<td><button class="btn btn-success" onclick="share('${file.id_file}')"><i class="bi bi-share"></i></td></button>`);
-              const del = $(`<td><button class="btn btn-danger" onclick="delete('${file.id_file}')"><i class="bi bi-trash"></i></td></button>`);
+              const share = $(`<td><button class="btn btn-success" onclick="openModalShare('${file.id_file}')"><i class="bi bi-share"></i></td></button>`);
+              const del = $(`<td><button class="btn btn-danger" onclick="delete_file('${file.id_file}')"><i class="bi bi-trash"></i></td></button>`);
 
               row.append(name);
               row.append(size);
               row.append(download);
               row.append(share);
               row.append(del);
-              $("tbody").append(row);
+              $("#files").append(row);
             });
           } else {
             console.log(res.message);
@@ -119,6 +156,42 @@ if(!isset($_SESSION['user'])) {
         error: function (err) {
           console.log("error");
           console.log(err);
+        }
+      });
+    });
+  </script>
+
+  <!-- Shared file -->
+  <script>
+    $(document).ready(() => {
+      $.ajax({
+        url: "../php/get-shared-files.php",
+        type: "POST",
+        dataType: "json",
+        success: function (res) {
+          console.log(res);
+          if(res.status  === "success"){
+          res.files.forEach((file) => {
+            const space = (file[0].size / 1000000).toFixed(2);
+
+            const row = $("<tr></tr>");
+            const name = $("<td></td>").text(file[0].title);
+            const download = $(`<td><button class="btn btn-light" onclick="download('${file[0].id_file}')"><i class="bi bi-download"></i></td></button>`);
+            const size = $("<td></td>").text(space + 'MB');
+            const creator = $("<td></td>").text(file[0].id_user);
+
+            row.append(name);
+            row.append(download);
+            row.append(size);
+            row.append(creator);
+            $("#files-shared").append(row);
+          });
+          
+        }else{
+          console.error(res.message);
+        }},
+        error: function (err) {
+          console.error(err);
         }
       });
     });
@@ -143,7 +216,7 @@ if(!isset($_SESSION['user'])) {
           id_file: id_file
         },
         success: function (res) {
-          console.log("download", id_file);
+          console.log(res);
           file = res.file;
           const link = document.createElement("a");
           link.href = "data:application/octet-stream;base64," + String.raw`${file.file}`;
@@ -192,6 +265,79 @@ if(!isset($_SESSION['user'])) {
         }
       });
    }
+  </script>
+
+  <script>
+    function delete_file(id_file){
+      $.ajax({
+        url: "../php/delete.php",
+        type: "POST",
+        data: {
+          id_file: id_file
+        },
+        success: function (res) {
+          alert(res.message);
+          window.location.reload();
+        },
+        error: function (err) {
+          console.log("error");
+          console.log(err);
+        }
+      });
+    }
+  </script>
+
+  <script>
+    function openModalShare(id_file){
+      $('#shareModal').modal('show');
+      document.getElementById("shareButton").setAttribute("onclick", `share('${id_file}')`);
+
+      $.ajax({
+        url: "../php/get-users.php",
+        type: "POST",
+        success: function (res) {
+          res.users.forEach(function (user) {
+            const row = $("<tr></tr>");
+            const name = $("<td></td>").text(user.username);
+            const check = $(`<td><input type="checkbox" id="${user.id_user}" value="${user.id_user}"></td>`);
+
+            row.append(name);
+            row.append(check);
+            $("#users").append(row);
+          });
+        },
+        error: function (err) {
+          console.log("error");
+          console.log(err);
+        }
+      });
+    }
+  </script>
+
+  <script>
+    function share(id_file){
+      const users = [];
+      const checkboxes = document.querySelectorAll('input[type=checkbox]:checked');
+      for (let i = 0; i < checkboxes.length; i++) {
+        users.push(checkboxes[i].value);
+      }
+
+      $.ajax({
+        url: "../php/share.php",
+        type: "POST",
+        data: {
+          id_file: id_file,
+          users: users
+        },
+        success: function (res) {
+          console.log(res);
+        },
+        error: function (err) {
+          console.log("error");
+          console.log(err);
+        }
+      });
+    }
   </script>
 
 </body>

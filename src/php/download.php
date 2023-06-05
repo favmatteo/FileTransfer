@@ -12,9 +12,8 @@ if(!isset($id_file)) {
     exit();
 }
 
-$stmt = $conn->prepare("SELECT * FROM file WHERE id_file = :id_file AND id_user = :id_user");
+$stmt = $conn->prepare("SELECT * FROM file WHERE id_file = :id_file");
 $stmt->bindParam(':id_file', $id_file);
-$stmt->bindParam(':id_user', $id_user);
 $stmt->execute();
 
 if($stmt->rowCount() == 0) {
