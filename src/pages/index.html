@@ -63,7 +63,8 @@ if(!isset($_SESSION['user'])) {
               </thead>
               <tbody id="files">
               </tbody>
-          </table>
+            </table>
+          </div>
 
           <h2>Shared with you</h2>
           <div class="table-responsive">
@@ -71,9 +72,9 @@ if(!isset($_SESSION['user'])) {
               <thead>
                 <tr>
                   <th scope="col" class="width-80">File name</th>
-                  <th scope="col" class="width-5">Download</th>
-                  <th scope="col" class="width-5" >Space</th>
-                  <th scope="col" class="width-10">Creator</th>
+                  <th scope="col" class="width-10">Download</th>
+                  <th scope="col" class="width-10">Space</th>
+                  <th scope="col" class="width-5">Creator</th>
                 </tr>
               </thead>
               <tbody id="files-shared">
@@ -290,6 +291,7 @@ if(!isset($_SESSION['user'])) {
   <script>
     function openModalShare(id_file){
       $('#shareModal').modal('show');
+      document.getElementById("users").innerHTML = "";
       document.getElementById("shareButton").setAttribute("onclick", `share('${id_file}')`);
 
       $.ajax({
