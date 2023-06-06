@@ -307,12 +307,35 @@ if(!isset($_SESSION['user'])) {
             row.append(check);
             $("#users").append(row);
           });
+          // check for every user if the file is shared
+          $.ajax({
+            url: "../php/get-shared-users.php",
+            type: "POST",
+            data: {
+              id_file: id_file
+            },
+            success: function (res) {
+              if(res.status === "success"){
+                res.users.forEach(function (user) {
+                  document.getElementById(user.id_user).checked = true;
+                });
+              }else{
+                console.error(res.message);
+              }
+            },
+            error: function (err) {
+              console.log("error");
+              console.log(err);
+            }
+          });
         },
         error: function (err) {
           console.log("error");
           console.log(err);
         }
       });
+
+      
     }
   </script>
 
@@ -332,7 +355,9 @@ if(!isset($_SESSION['user'])) {
           users: users
         },
         success: function (res) {
-          console.log(res);
+          alert("File shared successfully");
+          window.location.reload();
+
         },
         error: function (err) {
           console.log("error");
