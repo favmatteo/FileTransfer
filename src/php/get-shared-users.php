@@ -6,7 +6,7 @@ header('Content-Type: application/json');
 $id_file = $_POST['id_file'];
 
 // get all users who have access to the file
-$stmt = $conn->prepare("SELECT id_user FROM shared WHERE id_file = :id_file");
+$stmt = $conn->prepare("SELECT distinct id_user FROM shared WHERE id_file = :id_file");
 $stmt->bindParam(':id_file', $id_file);
 $stmt->execute();
 

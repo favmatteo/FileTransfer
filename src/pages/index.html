@@ -291,6 +291,7 @@ if(!isset($_SESSION['user'])) {
   <script>
     function openModalShare(id_file){
       $('#shareModal').modal('show');
+      
       document.getElementById("users").innerHTML = "";
       document.getElementById("shareButton").setAttribute("onclick", `share('${id_file}')`);
 
@@ -317,6 +318,7 @@ if(!isset($_SESSION['user'])) {
             success: function (res) {
               if(res.status === "success"){
                 res.users.forEach(function (user) {
+                  console.log(user.id_user);
                   document.getElementById(user.id_user).checked = true;
                 });
               }else{
@@ -324,13 +326,11 @@ if(!isset($_SESSION['user'])) {
               }
             },
             error: function (err) {
-              console.log("error");
               console.log(err);
             }
           });
         },
         error: function (err) {
-          console.log("error");
           console.log(err);
         }
       });
@@ -346,7 +346,6 @@ if(!isset($_SESSION['user'])) {
       for (let i = 0; i < checkboxes.length; i++) {
         users.push(checkboxes[i].value);
       }
-
       $.ajax({
         url: "../php/share.php",
         type: "POST",
