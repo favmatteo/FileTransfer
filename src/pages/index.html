@@ -211,7 +211,7 @@ if(!isset($_SESSION['user'])) {
   <script>
     function download(id_file) {
       $.ajax({
-        url:   "../php/download.php",
+        url: "../php/download.php",
         type: "POST",
         data: {
           id_file: id_file
@@ -251,7 +251,7 @@ if(!isset($_SESSION['user'])) {
       document.getElementsByClassName('loader')[0].style.display = 'block';
       
       $.ajax({
-        url:   '../php/upload.php',
+        url: '../php/upload.php',
         type: 'POST',
         data: formData,
         processData: false,
@@ -271,7 +271,7 @@ if(!isset($_SESSION['user'])) {
   <script>
     function delete_file(id_file){
       $.ajax({
-        url:   "../php/delete.php",
+        url: "../php/delete.php",
         type: "POST",
         data: {
           id_file: id_file
@@ -296,7 +296,7 @@ if(!isset($_SESSION['user'])) {
       document.getElementById("shareButton").setAttribute("onclick", `share('${id_file}')`);
 
       $.ajax({
-        url:   "../php/get-users.php",
+        url: "../php/get-users.php",
         type: "POST",
         success: function (res) {
           res.users.forEach(function (user) {
@@ -310,7 +310,7 @@ if(!isset($_SESSION['user'])) {
           });
           // check for every user if the file is shared
           $.ajax({
-            url:   "../php/get-shared-users.php",
+            url: "../php/get-shared-users.php",
             type: "POST",
             data: {
               id_file: id_file
@@ -347,7 +347,7 @@ if(!isset($_SESSION['user'])) {
         users.push(checkboxes[i].value);
       }
       $.ajax({
-        url:   "../php/share.php",
+        url: "../php/share.php",
         type: "POST",
         data: {
           id_file: id_file,
