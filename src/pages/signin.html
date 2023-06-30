@@ -41,7 +41,7 @@
     $(document).ready(() => {
         $("#signin").click((e) => {
             $.ajax({
-                url: __dirname + "../php/signin.php",
+                url:   "../php/signin.php",
                 type: "POST",
                 data: {
                     email: $("#email").val(),

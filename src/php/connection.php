@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . 'config.php';
+require_once 'config.php';
 $host = getenv("DB_HOST");
 $dbname = getenv("DB_NAME");
 $username = getenv("DB_USER");
