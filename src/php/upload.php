@@ -2,7 +2,12 @@
 
 require_once('connection.php');
 header('Content-Type: application/json');
-ini_set('upload_max_filesize', '1000M');
+ini_set('upload_max_filesize', getenv("MAX_FILE_SIZE"));
+
+if(getenv("NEW_FILE") == "false") {
+    echo json_encode(array("status" => "error", "message" => "New file uploads are disabled!"));
+    exit();
+}
 
 $file = $_FILES['file'];
 session_start();

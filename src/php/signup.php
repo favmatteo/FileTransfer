@@ -2,7 +2,14 @@
 
 // import the connection variables
 require_once('connection.php');
+require_once 'config.php';
+
 header('Content-Type: application/json');
+
+if(getenv("NEW_USER") == "false") {
+    echo json_encode(array("status" => "error", "message" => "New user registrations are disabled!"));
+    exit();
+}
 
 $email = $_POST['email'];
 $password = $_POST['password'];

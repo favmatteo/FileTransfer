@@ -354,7 +354,7 @@ if(!isset($_SESSION['user'])) {
           users: users
         },
         success: function (res) {
-          alert("File shared successfully");
+          alert(res.message);
           window.location.reload();
 
         },

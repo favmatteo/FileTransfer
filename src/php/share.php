@@ -4,6 +4,16 @@ require_once('connection.php');
 header('Content-Type: application/json');
 
 $id_file = $_POST['id_file'];
+
+
+if(!isset($_POST['users'])){
+    $stmt = $conn->prepare("DELETE FROM shared WHERE id_file = :id_file");
+    $stmt->bindParam(':id_file', $id_file);
+    $stmt->execute();
+    echo json_encode(array("status" => "success", "message" => "File unshared successfully!"));
+    exit();
+}
+
 $users = $_POST['users'];
 
 
