@@ -1,8 +1,8 @@
 <?php
 
 // import the connection variables
-require_once('connection.php');
-require_once 'config.php';
+require_once(__DIR__ . 'connection.php');
+require_once(__DIR__ . 'config.php');
 
 header('Content-Type: application/json');
 

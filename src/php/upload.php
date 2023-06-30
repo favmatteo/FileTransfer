@@ -1,6 +1,6 @@
 <?php
 
-require_once('connection.php');
+require_once(__DIR__ . 'connection.php');
 header('Content-Type: application/json');
 ini_set('upload_max_filesize', getenv("MAX_FILE_SIZE"));
 
